@@ -6,62 +6,47 @@ import {
   Divider
 } from 'antd';
 // import { connect, Dispatch, Loading, UserState, useModel } from 'umi';
-import { connect } from 'dva';
+import { connect, useSelector } from 'dva';
+import UserModal from '../../components/userModal'
 
 
- const index =(props)=> {
+ const UserListPage =(props)=> {
+  //  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
    const {users}= props;
-  console.log('222', users);
-  
   const columns = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+    },
     {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
-      render: text => <a>{text}</a>,
+      valueType: 'text',
+      render: (text) => <a>{text}</a>,
     },
     {
-      title: 'Age',
-      dataIndex: 'age',
-      key: 'age',
-    },
-    {
-      title: 'Address',
-      dataIndex: 'address',
-      key: 'address',
-    },
-    {
-      title: 'Tags',
-      key: 'tags',
-      dataIndex: 'tags',
-      render: tags => (
-        <span>
-          {tags.map(tag => {
-            let color = tag.length > 5 ? 'geekblue' : 'green';
-            if (tag === 'loser') {
-              color = 'volcano';
-            }
-            return (
-              <Tag color={color} key={tag}>
-                {tag.toUpperCase()}
-              </Tag>
-            );
-          })}
-        </span>
-      ),
+      title: 'Create Time',
+      dataIndex: 'create_time',
+      valueType: 'dateTime',
+      key: 'create_time',
     },
     {
       title: 'Action',
       key: 'action',
       render: (text, record) => (
         <span>
-          <a>Invite {record.name}</a>
-          <Divider type="vertical" />
+          <a onClick={() => {
+            setModalVisible(true);
+          }}>Edit</a>&nbsp;
           <a>Delete</a>
         </span>
       ),
     },
   ];
+   
   /* const data = [
     {
       key: '1',
@@ -87,7 +72,8 @@ import { connect } from 'dva';
   ] */
   return (
     <div className={styles.list}>
-        <Table columns={columns} dataSource={users} />
+        <Table columns={columns} dataSource={users.data} />
+        <UserModal visible={modalVisible} ></UserModal>
     </div>
   );
 }
@@ -98,5 +84,5 @@ const mapStateToProps = ({
     users,
   };
 };
-export default connect (mapStateToProps) (index);
+export default connect (mapStateToProps) (UserListPage);
 // export default index;
