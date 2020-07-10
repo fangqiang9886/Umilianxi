@@ -3,7 +3,9 @@ import React, { useState, useRef, FC } from 'react';
 import {
   Table,
   Tag,
-  Divider
+  Divider,
+  Popconfirm,
+  message 
 } from 'antd';
 // import { connect, Dispatch, Loading, UserState, useModel } from 'umi';
 import { connect, useSelector } from 'dva';
@@ -13,7 +15,10 @@ import UserModal from '../../components/userModal'
  const UserListPage =(props)=> {
   //  const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-   const {users}= props;
+  const [record, setRecord] = useState(undefined);
+   const { users,dispatch } = props;
+   console.log(props);
+   
   const columns = [
     {
       title: 'ID',
@@ -36,44 +41,63 @@ import UserModal from '../../components/userModal'
     {
       title: 'Action',
       key: 'action',
+      valueType: 'option',
       render: (text, record) => (
         <span>
           <a onClick={() => {
-            setModalVisible(true);
+            editHandler(record);
           }}>Edit</a>&nbsp;
+          <Popconfirm
+          title="Are you sure delete this user?"
+          onConfirm={() => {
+            deleteHandler(record.id);
+          }}
+          okText="Yes"
+          cancelText="No"
+        >
           <a>Delete</a>
+        </Popconfirm>,
         </span>
       ),
     },
   ];
-   
-  /* const data = [
-    {
-      key: '1',
-      name: 'John Brown',
-      age: 32,
-      address: 'New York No. 1 Lake Park',
-      tags: ['nice', 'developer'],
-    },
-    {
-      key: '2',
-      name: 'Jim Green',
-      age: 42,
-      address: 'London No. 1 Lake Park',
-      tags: ['loser'],
-    },
-    {
-      key: '3',
-      name: 'Joe Black',
-      age: 32,
-      address: 'Sidney No. 1 Lake Park',
-      tags: ['cool', 'teacher'],
-    },
-  ] */
+  //  console.log(recoed);
+   const deleteHandler = (id) => {
+     dispatch({
+       type: 'users/delete',
+       payload: {
+         id,
+       }
+     })
+   }
+  const editHandler = (record) => {
+    setModalVisible(true);
+    setRecord(record);
+  };
+  const closeHandler = () => {
+    setModalVisible(false);
+  };
+  const onFinish = values => {
+    // console.log('Success:', values);
+    const id = record.id;
+    dispatch({
+      type: 'users/edit',
+      payload: {
+        id,
+        values
+      },
+    })
+
+  };
   return (
     <div className={styles.list}>
-        <Table columns={columns} dataSource={users.data} />
-        <UserModal visible={modalVisible} ></UserModal>
+        <Table columns={columns} dataSource={users.data} rowKey='id'/>
+      <UserModal
+        visible={modalVisible}
+        record={record}
+        closeHandler={closeHandler}
+        onFinish={onFinish}
+      ></UserModal>
     </div>
   );
 }

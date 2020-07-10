@@ -1,5 +1,8 @@
 import { Effect, ImmerReducer, Reducer, Subscription } from 'umi';
-import { getRemoteList } from '../service/index';
+import { getRemoteList, editRecord, deleteRecord } from '../service/index';
+import {
+  message 
+} from 'antd';
 const UserModel= {
   namespace: 'users',
   state: {
@@ -7,17 +10,46 @@ const UserModel= {
   effects: {
     *getRemote({ payload }, { call, put }) {
       const data= yield call(getRemoteList)
-      console.log( '334',data);
+      // console.log( '334',data);
       yield put ({
         type:'getList',
         payload:{data}
       })
     },
+    *edit({ payload:{id,values} }, { call, put }) {
+      const data= yield call(editRecord,{id,values})
+      // // console.log( '334',data);
+      // yield put ({
+      //   type:'getList',
+      //   payload:{data}
+      // })
+      // console.log('edit here',payload);
+      
+    },
+    *delete({ payload: { id } }, { put, call, select }) {
+      const data = yield call(deleteRecord, { id });
+      if (data) {
+        message.success('Delete successfully.');
+        const { page, per_page } = yield select(
+          (state) => state.users.meta,
+        );
+        yield put({
+          type: 'getRemote',
+          payload: {
+            page,
+            per_page,
+          },
+        });
+      } else {
+        message.error('Delete failed.');
+      }
+    },
   },
   reducers: {
     getList(state, {payload}) {
+      
+      payload = payload.data
       console.log(payload);
-      payload=payload.data
       return payload;
     },
     // 启用 immer 之后
